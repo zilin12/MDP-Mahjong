@@ -1,0 +1,55 @@
+{
+  "hands": 100,
+  "completed": 71,
+  "completion_rate": 0.71,
+  "faults": {
+    "verification": 13,
+    "identity": 15,
+    "silent_identity": 1
+  },
+  "outcomes": {
+    "robot_win": 15,
+    "other_win": 56,
+    "exhausted": 0
+  },
+  "mean_sim_time_s_completed": 541.3577464788733,
+  "mean_operations": 33.51,
+  "recoveries": 41,
+  "hands_with_recovery_completed": 8
+}
+{
+  "hands": 100,
+  "completed": 84,
+  "completion_rate": 0.84,
+  "faults": {
+    "verification": 9,
+    "identity": 6,
+    "silent_identity": 1
+  },
+  "outcomes": {
+    "robot_win": 20,
+    "other_win": 64,
+    "exhausted": 0
+  },
+  "mean_sim_time_s_completed": 552.1119047619047,
+  "mean_operations": 35.89,
+  "recoveries": 36,
+  "hands_with_recovery_completed": 15
+}
+{
+  "hands": 100,
+  "completed": 0,
+  "completion_rate": 0.0,
+  "faults": {
+    "collision": 100
+  },
+  "outcomes": {
+    "robot_win": 0,
+    "other_win": 0,
+    "exhausted": 0
+  },
+  "mean_sim_time_s_completed": null,
+  "mean_operations": 0.0,
+  "recoveries": 0,
+  "hands_with_recovery_completed": 0
+}

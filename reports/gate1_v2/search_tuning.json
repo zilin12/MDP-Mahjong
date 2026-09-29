@@ -1,0 +1,11 @@
+{
+  "note": "Decision-time search (agents/search.py) on 2,000 validation hands vs three training heuristics, paired with the unsearched policy on the same hands. Spec: samples:top_k:confidence threshold.",
+  "policy_only_win": 0.268,
+  "variants": {
+    "24:3:0.90": {"win": 0.2485, "minus_policy": -0.0195, "ci95": [-0.0386, -0.0004]},
+    "48:3:0.90": {"win": 0.2675, "minus_policy": -0.0005, "ci95": [-0.0194, 0.0184]},
+    "24:4:0.97": {"win": 0.2345, "minus_policy": -0.0335, "ci95": [-0.0542, -0.0128]},
+    "150:2:0.60": {"win": 0.2620, "minus_policy": -0.0060, "ci95": [-0.0187, 0.0067]}
+  },
+  "conclusion": "No variant beat the policy; search was not adopted and not run on test hands."
+}

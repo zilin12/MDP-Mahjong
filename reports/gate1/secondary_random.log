@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "criteria": {
+    "no_illegal_actions": true,
+    "advantage_over_random_ci_above_zero": true
+  },
+  "policy_minus_random": {
+    "mean": 0.6933,
+    "ci95": [
+      0.6841686538103859,
+      0.7024313461896141
+    ],
+    "n": 10000
+  },
+  "policy_minus_heuristic": {
+    "mean": -0.183,
+    "ci95": [
+      -0.19369466661894424,
+      -0.17230533338105575
+    ],
+    "n": 10000
+  }
+}
+policy     win 0.7017 dealin 0.0043 illegal 0
+random     win 0.0084 dealin 0.0086 illegal 0
+heuristic  win 0.8847 dealin 0.0022 illegal 0

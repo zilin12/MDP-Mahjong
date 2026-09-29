@@ -1,0 +1,135 @@
+{
+  "classical": {
+    "shared_zone_pick": {
+      "successes": 49,
+      "trials": 50,
+      "rate": 0.98,
+      "passes_90pct": true,
+      "failures": {
+        "not perceived": 1
+      }
+    },
+    "close_packed_extraction": {
+      "successes": 48,
+      "trials": 50,
+      "rate": 0.96,
+      "passes_90pct": true,
+      "failures": {
+        "neighbours disturbed": 2
+      }
+    },
+    "insertion": {
+      "successes": 49,
+      "trials": 50,
+      "rate": 0.98,
+      "passes_90pct": true,
+      "failures": {
+        "misplaced": 1
+      }
+    },
+    "reorientation": {
+      "successes": 50,
+      "trials": 50,
+      "rate": 1.0,
+      "passes_90pct": true,
+      "failures": {}
+    },
+    "placement": {
+      "successes": 50,
+      "trials": 50,
+      "rate": 1.0,
+      "passes_90pct": true,
+      "failures": {}
+    }
+  },
+  "hybrid": {
+    "shared_zone_pick": {
+      "successes": 49,
+      "trials": 50,
+      "rate": 0.98,
+      "passes_90pct": true,
+      "failures": {
+        "not perceived": 1
+      }
+    },
+    "close_packed_extraction": {
+      "successes": 48,
+      "trials": 50,
+      "rate": 0.96,
+      "passes_90pct": true,
+      "failures": {
+        "neighbours disturbed": 2
+      }
+    },
+    "insertion": {
+      "successes": 49,
+      "trials": 50,
+      "rate": 0.98,
+      "passes_90pct": true,
+      "failures": {
+        "misplaced": 1
+      }
+    },
+    "reorientation": {
+      "successes": 50,
+      "trials": 50,
+      "rate": 1.0,
+      "passes_90pct": true,
+      "failures": {}
+    },
+    "placement": {
+      "successes": 50,
+      "trials": 50,
+      "rate": 1.0,
+      "passes_90pct": true,
+      "failures": {}
+    }
+  },
+  "learned": {
+    "shared_zone_pick": {
+      "successes": 0,
+      "trials": 50,
+      "rate": 0.0,
+      "passes_90pct": false,
+      "failures": {
+        "collision risk: learned approach left the reachable workspac": 50
+      }
+    },
+    "close_packed_extraction": {
+      "successes": 0,
+      "trials": 50,
+      "rate": 0.0,
+      "passes_90pct": false,
+      "failures": {
+        "collision risk: learned approach left the reachable workspac": 50
+      }
+    },
+    "insertion": {
+      "successes": 0,
+      "trials": 50,
+      "rate": 0.0,
+      "passes_90pct": false,
+      "failures": {
+        "collision risk: learned approach left the reachable workspac": 50
+      }
+    },
+    "reorientation": {
+      "successes": 0,
+      "trials": 50,
+      "rate": 0.0,
+      "passes_90pct": false,
+      "failures": {
+        "collision risk: learned approach left the reachable workspac": 50
+      }
+    },
+    "placement": {
+      "successes": 0,
+      "trials": 50,
+      "rate": 0.0,
+      "passes_90pct": false,
+      "failures": {
+        "collision risk: learned approach left the reachable workspac": 50
+      }
+    }
+  }
+}

@@ -1,0 +1,777 @@
+<title>Single-arm Mahjong Progress</title>
+<meta name="description" content="Gate-by-gate progress of the YAM Mahjong robot: results, failures, and remaining work.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f3f5f3;
+  --surface: #fcfdfc;
+  --ink: #0e1512;
+  --ink-2: #48534e;
+  --muted: #7f8984;
+  --line: #dce2de;
+  --axis: #c2cbc6;
+  --jade: #0f6b52;
+  --jade-wash: #e3efe9;
+  --felt: #1e5a3e;
+  --ivory: #efe8d4;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --neutral-fill: #c9cfcb;
+  --good: #0ca30c;
+  --good-text: #006300;
+  --warn: #fab219;
+  --crit: #d03b3b;
+  --crit-text: #b02a2a;
+  --ring: rgba(14, 21, 18, 0.10);
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0b100e;
+    --surface: #131a17;
+    --ink: #eef3f0;
+    --ink-2: #b6c2bc;
+    --muted: #87918c;
+    --line: #25302b;
+    --axis: #3a4640;
+    --jade: #4cb98f;
+    --jade-wash: #16261f;
+    --felt: #1e5a3e;
+    --ivory: #e8e1cc;
+    --s1: #3987e5;
+    --s2: #d95926;
+    --s3: #199e70;
+    --neutral-fill: #454d49;
+    --good-text: #3fcf3f;
+    --crit-text: #f07474;
+    --ring: rgba(255, 255, 255, 0.10);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b100e;
+  --surface: #131a17;
+  --ink: #eef3f0;
+  --ink-2: #b6c2bc;
+  --muted: #87918c;
+  --line: #25302b;
+  --axis: #3a4640;
+  --jade: #4cb98f;
+  --jade-wash: #16261f;
+  --felt: #1e5a3e;
+  --ivory: #e8e1cc;
+  --s1: #3987e5;
+  --s2: #d95926;
+  --s3: #199e70;
+  --neutral-fill: #454d49;
+  --good-text: #3fcf3f;
+  --crit-text: #f07474;
+  --ring: rgba(255, 255, 255, 0.10);
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 var(--body);
+  padding-inline: 16px;
+  padding-block: 0 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(34px, 6vw, 58px); font-weight: 800; font-stretch: 78%; line-height: 1.0; letter-spacing: -0.01em; }
+h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 750; font-stretch: 82%; line-height: 1.1; }
+h3 { font-size: 17px; font-weight: 650; font-stretch: 92%; }
+p { margin: 0; max-width: 66ch; color: var(--ink-2); }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--jade); }
+.num { font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 22px; }
+.section-head { display: grid; gap: 10px; }
+
+/* header */
+header.top { padding-block: 44px 8px; display: grid; gap: 18px; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 8px 20px; font: 13px/1.4 var(--mono); color: var(--muted); }
+.tilebar { display: flex; gap: 5px; margin-top: 2px; }
+.tilebar span { width: 16px; height: 21px; border-radius: 3px; background: var(--ivory); box-shadow: inset 0 -4px 0 var(--felt), 0 0 0 1px var(--ring); }
+
+/* gate scoreboard */
+.gates { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 860px) { .gates { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .gates { grid-template-columns: 1fr; } }
+.gate { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 18px; display: grid; gap: 10px; align-content: start; }
+.gate .g-num { font: 500 12px/1 var(--mono); color: var(--muted); letter-spacing: 0.06em; }
+.gate .big { font: 800 34px/1 var(--display); font-stretch: 80%; }
+.gate .big small { font: 500 14px/1 var(--body); color: var(--muted); margin-left: 4px; }
+.gate p { font-size: 13.5px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; width: fit-content; font: 600 12px/1 var(--body); padding: 5px 9px 5px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); background: var(--bg); }
+.pill i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.pill.good i { background: var(--good); }
+.pill.warn i { background: var(--warn); }
+.pill.crit i { background: var(--crit); }
+.pill.idle i { background: transparent; box-shadow: inset 0 0 0 2px var(--muted); }
+
+/* panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: grid; gap: 4px; }
+.panel-head p { font-size: 13.5px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+.chart { width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--body); fill: var(--ink-2); font-size: 12px; }
+.chart .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart .val { fill: var(--ink); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .base { stroke: var(--axis); stroke-width: 1; }
+.chart .thresh { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .thresh-label { fill: var(--ink); font-size: 11px; font-weight: 600; }
+.chart .band { fill: var(--jade-wash); }
+.chart [data-tip] { cursor: default; }
+.chart [data-tip]:hover { filter: brightness(1.08); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+details.table-view { font-size: 13px; }
+details.table-view summary { cursor: pointer; color: var(--jade); font-weight: 500; width: fit-content; }
+details.table-view summary:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; border-radius: 3px; }
+.tscroll { overflow-x: auto; margin-top: 8px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 600; color: var(--ink-2); font-size: 12px; }
+td.r, th.r { text-align: right; }
+
+/* figure */
+.figure { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .figure { grid-template-columns: 1fr; } }
+.shot { position: relative; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px var(--ring); background: var(--felt); }
+.shot img { display: block; width: 100%; height: auto; }
+.tag { position: absolute; transform: translate(-50%, -50%); font: 600 11px/1.1 var(--body); color: #0e1512; background: rgba(252, 253, 252, 0.93); padding: 3px 6px; border-radius: 4px; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+@media (max-width: 520px) { .tag { font-size: 9.5px; padding: 2px 4px; } }
+.fig-notes { display: grid; gap: 12px; font-size: 14px; color: var(--ink-2); }
+.fig-notes dl { margin: 0; display: grid; gap: 10px; }
+.fig-notes dt { font-weight: 600; color: var(--ink); }
+.fig-notes dd { margin: 0; }
+.faces { overflow-x: auto; border-radius: 8px; box-shadow: 0 0 0 1px var(--ring); background: #ffffff; }
+.faces img { display: block; max-width: none; height: 64px; }
+
+/* lists */
+.outcomes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .outcomes { grid-template-columns: 1fr; } }
+.outcomes ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.outcomes li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; font-size: 14px; color: var(--ink-2); }
+.outcomes li b { color: var(--ink); font-weight: 600; }
+.mark { width: 16px; height: 16px; border-radius: 50%; margin-top: 3px; display: grid; place-items: center; font: 700 11px/1 var(--body); color: #ffffff; }
+.mark.ok { background: var(--good); }
+.mark.no { background: var(--crit); }
+
+.todo { display: grid; gap: 14px; }
+.todo-group { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; }
+.todo-group header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.prio { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 8px; border-radius: 4px; background: var(--jade-wash); color: var(--jade); }
+.todo-group ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; color: var(--ink-2); }
+.todo-group li::marker { color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.todo-group li b { color: var(--ink); font-weight: 600; }
+code { font: 12.5px var(--mono); background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
+
+.timeline { display: grid; gap: 0; }
+.step { display: grid; grid-template-columns: 110px 1fr 70px; gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.step:last-child { border-bottom: 0; }
+.step .when { font: 12px var(--mono); color: var(--muted); }
+.step .what { color: var(--ink-2); }
+.step .what b { color: var(--ink); font-weight: 600; }
+.step .score { font: 700 15px var(--display); font-stretch: 85%; text-align: right; font-variant-numeric: tabular-nums; }
+.meter { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.meter i { display: block; height: 100%; background: var(--s1); border-radius: 3px; }
+@media (max-width: 520px) { .step { grid-template-columns: 1fr 56px; } .step .when { grid-column: 1 / -1; } }
+
+footer { font-size: 12.5px; color: var(--muted); display: grid; gap: 6px; }
+footer code { font-size: 11.5px; }
+
+#tip { position: fixed; pointer-events: none; z-index: 10; background: var(--ink); color: var(--surface); font: 12.5px/1.4 var(--body); padding: 7px 10px; border-radius: 6px; max-width: 260px; box-shadow: 0 4px 14px rgba(0,0,0,0.2); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) { .chart [data-tip] { transition: filter 120ms; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Progress report · 29 September 2026</div>
+    <h1>Single-arm Mahjong</h1>
+    <p>One YAM arm with a linear_4310 gripper, a wrist D405 and an overhead D435i, playing one seat of a simplified Chinese Mahjong hand. The work is split into four gates. The two that run in software are done and measured; the two that need the physical robot have not been run.</p>
+    <div class="tilebar" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="meta-row"><span>Source: STATUS.md and reports/</span><span>Simulation and hardware reported separately</span><span>No hardware trials yet</span></div>
+  </header>
+
+  <section aria-labelledby="gates-h">
+    <div class="section-head">
+      <div class="eyebrow">Where each gate stands</div>
+      <h2 id="gates-h">Two gates measured, two waiting on hardware</h2>
+    </div>
+    <div class="gates">
+      <article class="gate">
+        <div class="g-num">GATE 1 · SYMBOLIC ENGINE</div>
+        <h3>Playing agent</h3>
+        <span class="pill good"><i></i>Passed</span>
+        <div class="big num">+13.3<small>pp over random</small></div>
+        <p>95% CI [12.6, 14.0] over 10,000 held-out, paired, seat-balanced hands. Zero illegal actions.</p>
+      </article>
+      <article class="gate">
+        <div class="g-num">GATE 2 · PHYSICAL ROBOT</div>
+        <h3>Tile operations</h3>
+        <span class="pill idle"><i></i>Not run on hardware</span>
+        <div class="big num">48–50<small>/ 50 per skill, sim</small></div>
+        <p>The simulation counterpart meets both thresholds. Recognition 98.1% overall, 90% worst type.</p>
+      </article>
+      <article class="gate">
+        <div class="g-num">GATE 3 · MUJOCO</div>
+        <h3>Physics integration</h3>
+        <span class="pill warn"><i></i>Met by classical only</span>
+        <div class="big num">72<small>/ 100 hands</small></div>
+        <p>Classical-only clears the 70-hand bar. The hybrid completed 66; learned-only 0.</p>
+      </article>
+      <article class="gate">
+        <div class="g-num">GATE 4 · PHYSICAL ROBOT</div>
+        <h3>Physical play</h3>
+        <span class="pill idle"><i></i>Not run</span>
+        <div class="big num">0<small>/ 5 hands run</small></div>
+        <p>Operator protocol and trial scoring are ready: <code>mahjong-robot trial add --gate 4</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="table-h">
+    <div class="section-head">
+      <div class="eyebrow">What the robot sees</div>
+      <h2 id="table-h">The table, 18 robot actions into a held-out hand</h2>
+      <p>A real overhead D435i frame from a Gate 3 hand. The robot sits at the left edge; image right points across the table. The arm is parked out of view of the work areas before every capture.</p>
+    </div>
+    <div class="figure">
+      <div class="shot">
+        <img src="data:image/jpeg;base64,__OVERHEAD__" alt="Overhead camera frame of the simulated table mid-hand: the robot arm parked at left, the robot's upright hand row, its face-up pond and melds, the yellow shared zone, and three opponents' ponds and melds." width="880" height="576">
+        <span class="tag" style="left:28.9%;top:10%">Shared zone</span>
+        <span class="tag" style="left:25.3%;top:62%">Hand row (upright)</span>
+        <span class="tag" style="left:37.5%;top:26%">Robot pond</span>
+        <span class="tag" style="left:30%;top:93%">Robot melds</span>
+        <span class="tag" style="left:59%;top:4%">Left seat</span>
+        <span class="tag" style="left:78%;top:36%">Across seat</span>
+        <span class="tag" style="left:59%;top:97%">Right seat</span>
+      </div>
+      <div class="fig-notes">
+        <dl>
+          <dt>Hand row</dt><dd>Tiles stand close-packed, faces toward the robot. The wrist D405 reads them from two scan poses.</dd>
+          <dt>Pond and melds</dt><dd>Face-up slots 40 mm apart, all within 0.30 m of the base, where the arm's 10 N·m joints can roll a tile flat.</dd>
+          <dt>Shared zone</dt><dd>The simulated human presents draws upright and claimed discards face-up here (ADR 0004).</dd>
+          <dt>Opponent tiles</dt><dd>Identified only from this camera. Across-table tiles cause most Gate 3 failures.</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>The 34 tile faces the classifier learns</h3><p>Characters, Bamboo, Dots, Winds and Dragons, drawn procedurally and legible at about 22 px in the overhead image.</p></div>
+      <div class="faces"><img src="data:image/png;base64,__FACES__" alt="Strip of the 34 tile faces: 1 to 9 Characters, 1 to 9 Bamboo, 1 to 9 Dots, East, South, West, North, Red, Green and White Dragons." width="1838" height="72"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="g1-h">
+    <div class="section-head">
+      <div class="eyebrow">Gate 1 · Playing agent</div>
+      <h2 id="g1-h">The policy beats legal random play everywhere, and trails the heuristic</h2>
+      <p>Each held-out hand is played three times with the same wall and opponent seeds, changing only who sits in the robot seat. The gate compares the policy with legal random play; the heuristic comparison is reported.</p>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-head"><h3>Robot-seat win rate by opponent set</h3><p>10,000 hands per opponent set. The gate uses the held-out heuristic.</p></div>
+        <div class="legend" id="g1-legend"></div>
+        <div class="chart" id="g1-chart"></div>
+        <details class="table-view"><summary>Table view</summary><div class="tscroll" id="g1-table"></div></details>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Training win rate over 300 PPO iterations</h3><p>Opponents change by stage, so the training line jumps at each promotion. Validation is always against the training heuristic.</p></div>
+        <div class="legend" id="tr-legend"></div>
+        <div class="chart" id="tr-chart"></div>
+        <details class="table-view"><summary>Table view (every 10th iteration)</summary><div class="tscroll" id="tr-table"></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="g2-h">
+    <div class="section-head">
+      <div class="eyebrow">Gate 2 · Tile operations (simulation counterpart)</div>
+      <h2 id="g2-h">Classical and hybrid skills clear 90%; learned-only never leaves the start</h2>
+      <p>These are simulated trials on seeds never used during development, with targets from overhead perception. They are not gate evidence: Gate 2 requires 50 physical trials per skill.</p>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-head"><h3>Successes out of 50 held-out trials</h3><p>Dashed line: the 45 / 50 (90%) pass mark.</p></div>
+        <div class="legend" id="sk-legend"></div>
+        <div class="chart" id="sk-chart"></div>
+        <details class="table-view"><summary>Table view</summary><div class="tscroll" id="sk-table"></div></details>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Recognition accuracy by tile type</h3><p>680 held-out views: 10 overhead and 10 wrist views per type. Lines mark the 80% per-type and 90% overall requirements.</p></div>
+        <div class="legend" id="rc-legend"></div>
+        <div class="chart" id="rc-chart"></div>
+        <details class="table-view"><summary>Table view</summary><div class="tscroll" id="rc-table"></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="g3-h">
+    <div class="section-head">
+      <div class="eyebrow">Gate 3 · Physics integration</div>
+      <h2 id="g3-h">72 of 100 hands complete end to end, with classical contact</h2>
+      <p>The full loop runs on 100 held-out hands, the same seeds for every mode. The robot sees only its cameras, and ground truth only scores the result. A hand counts once it reaches a win or wall exhaustion with no fault.</p>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-head"><h3>Completed hands by manipulation mode</h3><p>Dashed line: the 70-hand requirement.</p></div>
+        <div class="chart" id="g3-chart"></div>
+        <details class="table-view"><summary>Table view</summary><div class="tscroll" id="g3-table"></div></details>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Same 100 hands, classical against hybrid</h3><p>They differ on 8 hands: 7 favour classical and 1 favours the hybrid (exact McNemar p = 0.07).</p></div>
+        <div class="chart" id="pair-chart"></div>
+        <div class="legend" id="pair-legend"></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-head"><h3>Why hands fail</h3><p>Fault that aborted each failed hand, final block. Learned-only is left out: all 100 of its failures were collision risk on the first move.</p></div>
+        <div class="legend" id="fc-legend"></div>
+        <div class="chart" id="fc-chart"></div>
+        <details class="table-view"><summary>Table view</summary><div class="tscroll" id="fc-table"></div></details>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Learned contact policy: held-out residual error</h3><p>90th-percentile distance from the true contact pose after correction. It must beat the overhead estimate, about 3 mm, to be worth using.</p></div>
+        <div class="chart" id="cp-chart"></div>
+        <p style="font-size:13px">Extraction and right-end insertion pass on residuals but lost to classical in development trials (8/20 against 20/20 and 0/10 against 10/10). The hybrid therefore uses the learned policy only for flat picks (ADR 0005).</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>How classical-only completion got here</h3><p>Development runs used separate seeds. Each fix came from a fault dump of a failed hand.</p></div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sf-h">
+    <div class="section-head">
+      <div class="eyebrow">Summary</div>
+      <h2 id="sf-h">What worked and what did not</h2>
+    </div>
+    <div class="outcomes">
+      <div class="panel">
+        <h3>Worked</h3>
+        <ul>
+          <li><span class="mark ok" aria-hidden="true">✓</span><span><b>Rules engine</b> for the supplied rules plus a 13-point convention set (ADR 0001), with 29 passing tests covering conservation, calls, special wins and hidden information.</span></li>
+          <li><span class="mark ok" aria-hidden="true">✓</span><span><b>Playing agent</b>: a masked recurrent PPO policy passes Gate 1 with no illegal actions.</span></li>
+          <li><span class="mark ok" aria-hidden="true">✓</span><span><b>Perception</b>: per-tile positions in a close-packed row to about 0.2 mm; tile recognition 98.1%, with misreads flagged by low confidence.</span></li>
+          <li><span class="mark ok" aria-hidden="true">✓</span><span><b>Five tile operations</b> in physics, including the staged side-regrasp tip-over that lands tiles within about 2 mm of their slot.</span></li>
+          <li><span class="mark ok" aria-hidden="true">✓</span><span><b>End-to-end loop</b>: perception, belief, policy, binding, execution, verification and reconciliation complete 72% of held-out simulated hands.</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Did not work, or not done</h3>
+        <ul>
+          <li><span class="mark no" aria-hidden="true">✕</span><span><b>Hardware gates 2 and 4</b> are not run; this environment has no robot.</span></li>
+          <li><span class="mark no" aria-hidden="true">✕</span><span><b>The hybrid misses Gate 3</b> (66/100). Its learned contact policy did not improve on open-loop contact in this simulator.</span></li>
+          <li><span class="mark no" aria-hidden="true">✕</span><span><b>Learned-only fails every hand</b>: without a planner its approach policy drives the arm into joint limits, even after DAgger.</span></li>
+          <li><span class="mark no" aria-hidden="true">✕</span><span><b>Across-table identity</b>: opponents' tiles read below 0.8 confidence cause 15 to 18 of the failed hands.</span></li>
+          <li><span class="mark no" aria-hidden="true">✕</span><span><b>Strategy strength</b>: the policy wins 13.4% against 30.3% for the fixed heuristic in the same seat.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="todo-h">
+    <div class="section-head">
+      <div class="eyebrow">Remaining work</div>
+      <h2 id="todo-h">What needs to be done</h2>
+      <p>Grouped by what unblocks what. Hardware bring-up comes first because both physical gates depend on it and several simulation assumptions need checking against it.</p>
+    </div>
+    <div class="todo">
+      <div class="todo-group">
+        <header><h3>1. Bring up the hardware and check the simulation's assumptions</h3><span class="prio">Blocks gates 2 and 4</span></header>
+        <ol>
+          <li><b>Gripper direction.</b> Command joint7 = 0 and see whether the fingers close. The upstream meshes say closed; Agentic's contact model assumes open.</li>
+          <li><b>Pad and tile sizes.</b> Measure the fingertip width (about 15 mm assumed) and your tiles (20 × 26 × 16 mm, 12 g assumed), then update <code>sim/layout.py</code>.</li>
+          <li><b>Camera calibration.</b> Calibrate the D435i extrinsic and the D405 hand-eye transform. Simulation assumes about 1 mm / 0.1° and 0.5 mm / 0.3° error.</li>
+          <li><b>Mount and mark the table</b> as in <code>sim/layout.py</code>: hand anchor, pond and meld slots, staging spot and shared zone.</li>
+          <li><b>Build the hardware driver layer</b> (i2rt YAM control, RealSense capture) behind the same interfaces the simulator uses. It does not exist yet.</li>
+        </ol>
+      </div>
+      <div class="todo-group">
+        <header><h3>2. Run Gate 2 on the robot</h3><span class="prio">Gate 2</span></header>
+        <ol>
+          <li><b>Collect operator-guided demonstrations</b> for the contact skills and fine-tune the contact policy on them.</li>
+          <li><b>Re-run the hybrid selection</b> (ADR 0005) on hardware development trials; real contact may favour the learned policy where the simulator did not.</li>
+          <li><b>Run 50 held-out trials per skill and 10 views per tile type</b>, logged with <code>mahjong-robot trial add --gate 2</code> (docs/gate2-protocol.md).</li>
+        </ol>
+      </div>
+      <div class="todo-group">
+        <header><h3>3. Raise Gate 3 completion and make the hybrid pass</h3><span class="prio">Gate 3</span></header>
+        <ol>
+          <li><b>Across-table identity</b> (largest cause): add a second overhead view or a higher-resolution crop for the far ponds, and use a wrist-camera look before faulting.</li>
+          <li><b>Claimed tile not found in the shared zone</b> (4 hands): diagnose from the fault dumps in <code>reports/gate3/final/faults/</code>.</li>
+          <li><b>Tip-over landing errors</b> (5 to 6 hands): add a corrective push when a tile lands off its slot instead of faulting.</li>
+          <li><b>Contact policy</b>: DAgger in physics on the states the policy visits, and a wrist-camera mount that does not lose the row end behind the held tile.</li>
+          <li><b>Learned-only</b>: add joint-limit awareness or a joint-space action space to the approach policy so the ablation is a real comparison.</li>
+          <li><b>Re-run all three modes</b> on a fresh held-out block after any change, as with block 1.</li>
+        </ol>
+      </div>
+      <div class="todo-group">
+        <header><h3>4. Run Gate 4 physical play</h3><span class="prio">Gate 4</span></header>
+        <ol>
+          <li><b>Five complete hands</b> with humans dealing and presenting tiles per docs/gate4-protocol.md; no corrective touch.</li>
+          <li><b>Ten trials each</b> of Chow, Pung, exposed, concealed and added Kong, self-draw win and win by discard.</li>
+        </ol>
+      </div>
+      <div class="todo-group">
+        <header><h3>5. Optional: a stronger playing agent</h3><span class="prio">Not required</span></header>
+        <ol>
+          <li><b>Close the gap to the heuristic</b> (13.4% against 30.3%) with longer training, imitation warm-start or search. Gate 1 only requires beating random play.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Data: <code>reports/gate1/</code>, <code>reports/gate2/</code>, <code>reports/gate3/final/</code>, <code>runs/gate1/log.jsonl</code>. Criteria: <code>docs/evaluation.md</code>. Decisions: <code>docs/adr/0001–0005</code>.</div>
+    <div>Preliminary classical run on held-out block 0 completed 75/100 before the final code changes; the final comparison uses untouched block 1.</div>
+  </footer>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const D = __DATA__;
+const NS = "http://www.w3.org/2000/svg";
+const S1 = "var(--s1)", S2 = "var(--s2)", S3 = "var(--s3)";
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svg(host, w, h) {
+  const s = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img" });
+  document.getElementById(host).appendChild(s);
+  return s;
+}
+function legend(host, items) {
+  document.getElementById(host).innerHTML = items.map(([n, c]) => `<span><i style="background:${c}"></i>${n}</span>`).join("");
+}
+function table(host, head, rows) {
+  const h = head.map((x, i) => `<th class="${i ? "r" : ""}">${x}</th>`).join("");
+  const b = rows.map(r => "<tr>" + r.map((x, i) => `<td class="${i ? "r" : ""}">${x}</td>`).join("") + "</tr>").join("");
+  document.getElementById(host).innerHTML = `<table><thead><tr>${h}</tr></thead><tbody>${b}</tbody></table>`;
+}
+const pct = v => (v * 100).toFixed(1) + "%";
+function roundedBarH(parent, x, y, w, h, fill, tip) {
+  // horizontal bar anchored at x, rounded 4px only at the data end
+  const r = Math.min(4, w / 2, h / 2);
+  const d = w <= 0 ? "" : `M${x},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${y + h - r} Q${x + w},${y + h} ${x + w - r},${y + h} H${x} Z`;
+  const p = el("path", { d, fill }, parent);
+  if (tip) p.setAttribute("data-tip", tip);
+  return p;
+}
+function roundedBarV(parent, x, y0, w, h, fill, tip) {
+  const r = Math.min(4, w / 2, h / 2);
+  const top = y0 - h;
+  const d = h <= 0 ? "" : `M${x},${y0} V${top + r} Q${x},${top} ${x + r},${top} H${x + w - r} Q${x + w},${top} ${x + w},${top + r} V${y0} Z`;
+  const p = el("path", { d, fill }, parent);
+  if (tip) p.setAttribute("data-tip", tip);
+  return p;
+}
+
+/* ---------- Gate 1: grouped horizontal bars ---------- */
+(function () {
+  const sets = [["heldout_heuristic", "Held-out heuristic (gate)"], ["heuristic", "Training heuristic"], ["random", "Legal random"]];
+  const ser = [["policy", "Learned policy", S1], ["random", "Legal random", S2], ["heuristic", "Fixed heuristic", S3]];
+  legend("g1-legend", ser.map(s => [s[1], s[2]]));
+  const W = 520, L = 12, R = 60, top = 8, bh = 13, gapIn = 2, groupGap = 26, lab = 22;
+  const groupH = lab + ser.length * (bh + gapIn);
+  const H = top + sets.length * groupH + (sets.length - 1) * groupGap + 26;
+  const s = svg("g1-chart", W, H);
+  const x0 = L, x1 = W - R, sx = v => x0 + v * (x1 - x0);
+  [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+    el("line", { x1: sx(t), x2: sx(t), y1: top, y2: H - 22, class: "grid" }, s);
+    el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "tick" }, s, (t * 100) + "%");
+  });
+  let y = top;
+  const rows = [];
+  sets.forEach(([k, name]) => {
+    const c = D.gate1[k].conditions;
+    el("text", { x: x0, y: y + 12, style: "font-weight:600;fill:var(--ink)" }, s, `Opponents: ${name}`);
+    y += lab;
+    ser.forEach(([sk, sn, col]) => {
+      const v = c[sk].win_rate;
+      roundedBarH(s, x0, y, sx(v) - x0, bh, col, `${sn} vs ${name}: ${pct(v)} wins (${c[sk].wins} of ${c[sk].hands})`);
+      el("text", { x: sx(v) + 6, y: y + bh - 2, class: "val" }, s, pct(v));
+      y += bh + gapIn;
+    });
+    const d = D.gate1[k].policy_minus_random;
+    rows.push([name, pct(c.policy.win_rate), pct(c.random.win_rate), pct(c.heuristic.win_rate), `${(d.mean * 100).toFixed(1)} [${(d.ci95[0] * 100).toFixed(1)}, ${(d.ci95[1] * 100).toFixed(1)}]`, c.policy.illegal_actions]);
+    y += groupGap - gapIn;
+  });
+  el("line", { x1: x0, x2: x0, y1: top, y2: H - 22, class: "base" }, s);
+  table("g1-table", ["Opponents", "Policy", "Random", "Heuristic", "Policy − random, pp (95% CI)", "Illegal"], rows);
+})();
+
+/* ---------- Gate 1: training curve ---------- */
+(function () {
+  const T = D.train;
+  legend("tr-legend", [["Training win rate (current stage's opponents)", S1], ["Validation vs training heuristic", S2]]);
+  const W = 520, H = 290, L = 40, R = 12, top = 24, bot = 34;
+  const s = svg("tr-chart", W, H);
+  const n = T.length, sx = i => L + i / (n - 1) * (W - L - R), sy = v => top + (1 - v / 0.7) * (H - top - bot);
+  // stage bands
+  const stages = [];
+  T.forEach((r, i) => { if (!stages.length || stages[stages.length - 1].name !== r.stage) stages.push({ name: r.stage, a: i, b: i }); else stages[stages.length - 1].b = i; });
+  const names = { random_opponents: "vs random", heuristic_opponents: "vs heuristic", league: "league" };
+  stages.forEach((st, k) => {
+    if (k % 2 === 0) el("rect", { x: sx(st.a), y: top, width: sx(st.b) - sx(st.a), height: H - top - bot, class: "band" }, s);
+    el("text", { x: (sx(st.a) + sx(st.b)) / 2, y: top - 8, "text-anchor": "middle", class: "tick" }, s, names[st.name] || st.name);
+  });
+  [0, 0.2, 0.4, 0.6].forEach(t => {
+    el("line", { x1: L, x2: W - R, y1: sy(t), y2: sy(t), class: "grid" }, s);
+    el("text", { x: L - 6, y: sy(t) + 4, "text-anchor": "end", class: "tick" }, s, (t * 100) + "%");
+  });
+  [0, 100, 200, 299].forEach(i => el("text", { x: sx(i), y: H - 12, "text-anchor": "middle", class: "tick" }, s, i === 299 ? "300" : String(i)));
+  el("text", { x: (L + W - R) / 2, y: H - 0, "text-anchor": "middle", class: "tick" }, s, "PPO iteration (4,096 hands each)");
+  el("line", { x1: L, x2: W - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  el("path", { d: T.map((r, i) => (i ? "L" : "M") + sx(i).toFixed(1) + "," + sy(r.win).toFixed(1)).join(" "), fill: "none", stroke: S1, "stroke-width": 2, "stroke-linejoin": "round" }, s);
+  const vals = T.map((r, i) => [i, r.val]).filter(p => p[1] != null);
+  el("path", { d: vals.map((p, k) => (k ? "L" : "M") + sx(p[0]).toFixed(1) + "," + sy(p[1]).toFixed(1)).join(" "), fill: "none", stroke: S2, "stroke-width": 2, "stroke-linejoin": "round" }, s);
+  // endpoint + best
+  const best = vals.reduce((a, b) => (b[1] > a[1] ? b : a));
+  el("circle", { cx: sx(best[0]), cy: sy(best[1]), r: 4.5, fill: S2, stroke: "var(--surface)", "stroke-width": 2 }, s);
+  el("text", { x: sx(best[0]) - 8, y: sy(best[1]) + 22, "text-anchor": "end", class: "val" }, s, `selected checkpoint: ${pct(best[1])} (it. ${best[0]})`);
+  // crosshair hover
+  const hl = el("line", { y1: top, y2: H - bot, stroke: "var(--muted)", "stroke-width": 1, visibility: "hidden" }, s);
+  const hit = el("rect", { x: L, y: top, width: W - L - R, height: H - top - bot, fill: "transparent" }, s);
+  hit.addEventListener("mousemove", ev => {
+    const pt = s.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(s.getScreenCTM().inverse());
+    const i = Math.max(0, Math.min(n - 1, Math.round((p.x - L) / (W - L - R) * (n - 1))));
+    hl.setAttribute("x1", sx(i)); hl.setAttribute("x2", sx(i)); hl.setAttribute("visibility", "visible");
+    const r = T[i];
+    let v = null; for (let j = i; j >= 0; j--) if (T[j].val != null) { v = [j, T[j].val]; break; }
+    showTip(ev, `<b>Iteration ${r.it}</b> · ${names[r.stage] || r.stage}<br>Training win rate ${pct(r.win)}` + (v ? `<br>Last validation ${pct(v[1])} (it. ${v[0]})` : ""));
+  });
+  hit.addEventListener("mouseleave", () => { hl.setAttribute("visibility", "hidden"); hideTip(); });
+  table("tr-table", ["Iteration", "Stage", "Training win", "Validation win"], T.filter((r, i) => i % 10 === 9 || i === 0).map(r => [r.it, names[r.stage] || r.stage, pct(r.win), r.val == null ? "–" : pct(r.val)]));
+})();
+
+/* ---------- Gate 2: skills ---------- */
+(function () {
+  const skills = [["shared_zone_pick", "Shared-zone pick"], ["close_packed_extraction", "Close-packed extraction"], ["insertion", "Insertion"], ["reorientation", "Reorientation (tip-over)"], ["placement", "Placement"]];
+  const modes = [["classical", "Classical", S1], ["hybrid", "Hybrid", S2], ["learned", "Learned-only", S3]];
+  legend("sk-legend", modes.map(m => [m[1], m[2]]));
+  const W = 520, L = 12, R = 44, top = 8, bh = 11, gapIn = 2, lab = 21, gg = 16;
+  const gh = lab + modes.length * (bh + gapIn);
+  const H = top + skills.length * gh + (skills.length - 1) * gg + 26;
+  const s = svg("sk-chart", W, H);
+  const sx = v => L + v / 50 * (W - L - R);
+  [0, 10, 20, 30, 40, 50].forEach(t => {
+    el("line", { x1: sx(t), x2: sx(t), y1: top, y2: H - 22, class: "grid" }, s);
+    el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "tick" }, s, t);
+  });
+  let y = top; const rows = [];
+  skills.forEach(([k, name]) => {
+    el("text", { x: L, y: y + 12, style: "font-weight:600;fill:var(--ink)" }, s, name);
+    y += lab;
+    const row = [name];
+    modes.forEach(([m, mn, col]) => {
+      const r = D.skills[m][k];
+      const v = r.successes;
+      const fails = Object.entries(r.failures).map(([a, b]) => `${b}× ${a}`).join("; ") || "no failures";
+      if (v > 0) roundedBarH(s, L, y, sx(v) - L, bh, col, `${mn}, ${name}: ${v}/50<br>${fails}`);
+      else el("rect", { x: L, y: y, width: 3, height: bh, fill: col, "data-tip": `${mn}, ${name}: 0/50<br>${fails}` }, s);
+      el("text", { x: Math.max(sx(v), L + 3) + 5, y: y + bh - 1.5, class: "val" }, s, v);
+      row.push(`${v}/50`);
+      y += bh + gapIn;
+    });
+    rows.push(row);
+    y += gg - gapIn;
+  });
+  el("line", { x1: L, x2: L, y1: top, y2: H - 22, class: "base" }, s);
+  el("line", { x1: sx(45), x2: sx(45), y1: top, y2: H - 22, class: "thresh" }, s);
+  table("sk-table", ["Skill", "Classical", "Hybrid", "Learned-only"], rows);
+})();
+
+/* ---------- Gate 2: recognition dot strip ---------- */
+(function () {
+  const names = [];
+  for (const s of ["C", "B", "D"]) for (let r = 1; r <= 9; r++) names.push(r + s);
+  names.push("E", "S", "W", "N", "RD", "GD", "WD");
+  const long = t => t < 27 ? `${t % 9 + 1} ${["Character", "Bamboo", "Dot"][Math.floor(t / 9)]}` : ["East", "South", "West", "North", "Red Dragon", "Green Dragon", "White Dragon"][t - 27];
+  const acc = D.recog.per_type_acc;
+  const W = 520, H = 250, L = 40, R = 10, top = 16, bot = 52;
+  const s = svg("rc-chart", W, H);
+  const lo = 0.75, sy = v => top + (1 - (v - lo) / (1 - lo)) * (H - top - bot);
+  const step = (W - L - R) / 34, sx = t => L + step * (t + 0.5);
+  [0.75, 0.8, 0.85, 0.9, 0.95, 1].forEach(t => {
+    el("line", { x1: L, x2: W - R, y1: sy(t), y2: sy(t), class: "grid" }, s);
+    el("text", { x: L - 6, y: sy(t) + 4, "text-anchor": "end", class: "tick" }, s, Math.round(t * 100) + "%");
+  });
+  el("line", { x1: L, x2: W - R, y1: sy(0.8), y2: sy(0.8), class: "thresh" }, s);
+
+  el("line", { x1: L, x2: W - R, y1: sy(D.recog.overall_acc), y2: sy(D.recog.overall_acc), stroke: S1, "stroke-width": 1.5 }, s);
+  document.getElementById("rc-legend").innerHTML = `<span><i style="background:var(--s1);height:3px"></i>Overall ${pct(D.recog.overall_acc)} (needs 90%)</span><span><i style="background:none;border-top:2px dashed var(--ink);height:0"></i>80% per-type floor</span><span><i style="background:var(--s1);border-radius:50%"></i>100% of views</span><span><i style="background:var(--s2);border-radius:50%"></i>Below 100%</span>`;
+  const groups = [["Characters", 0, 9], ["Bamboo", 9, 18], ["Dots", 18, 27], ["Honors", 27, 34]];
+  groups.forEach(([g, a, b], k) => {
+    if (k) el("line", { x1: L + step * a, x2: L + step * a, y1: top, y2: H - bot + 30, class: "grid" }, s);
+    el("text", { x: L + step * (a + b) / 2, y: H - 8, "text-anchor": "middle", class: "tick" }, s, g);
+  });
+  const rows = [];
+  for (let t = 0; t < 34; t++) {
+    const v = acc[String(t)];
+    el("line", { x1: sx(t), x2: sx(t), y1: sy(lo), y2: sy(v), stroke: "var(--line)", "stroke-width": 2 }, s);
+    el("circle", { cx: sx(t), cy: sy(v), r: 4.5, fill: v < 1 ? S2 : S1, stroke: "var(--surface)", "stroke-width": 2, "data-tip": `${long(t)}: ${pct(v)} of 20 views` }, s);
+    el("text", { x: sx(t), y: H - bot + 16, "text-anchor": "middle", class: "tick", style: "font-size:9px" }, s, names[t]);
+    rows.push([long(t), pct(v)]);
+  }
+  el("line", { x1: L, x2: W - R, y1: sy(lo), y2: sy(lo), class: "base" }, s);
+  table("rc-table", ["Tile type", "Accuracy (20 views)"], rows);
+})();
+
+/* ---------- Gate 3: completion by mode ---------- */
+(function () {
+  const modes = [["classical", "Classical-only", S1], ["hybrid", "Hybrid", S2], ["learned", "Learned-only", S3]];
+  const W = 520, H = 172, L = 110, R = 50, top = 10, bh = 26, gap = 14;
+  const s = svg("g3-chart", W, H);
+  const sx = v => L + v / 100 * (W - L - R);
+  const plotB = top + modes.length * (bh + gap) - gap;
+  [0, 25, 50, 75, 100].forEach(t => {
+    el("line", { x1: sx(t), x2: sx(t), y1: top, y2: plotB, class: "grid" }, s);
+    el("text", { x: sx(t), y: plotB + 16, "text-anchor": "middle", class: "tick" }, s, t);
+  });
+  const rows = [];
+  modes.forEach(([m, name, col], i) => {
+    const r = D.g3[m], y = top + i * (bh + gap);
+    el("text", { x: L - 10, y: y + bh / 2 + 4, "text-anchor": "end", style: "font-weight:600;fill:var(--ink)" }, s, name);
+    const faults = Object.entries(r.faults).map(([a, b]) => `${b} ${a.replace("_", " ")}`).join(", ");
+    if (r.completed > 0) roundedBarH(s, L, y, sx(r.completed) - L, bh, col, `${name}: ${r.completed}/100 completed<br>Faults: ${faults}`);
+    else el("rect", { x: L, y, width: 3, height: bh, fill: col, "data-tip": `${name}: 0/100<br>Faults: ${faults}` }, s);
+    el("text", { x: Math.max(sx(r.completed), L + 3) + 6, y: y + bh / 2 + 4, class: "val" }, s, r.completed);
+    rows.push([name, r.completed, r.outcomes.robot_win, r.outcomes.other_win, r.outcomes.exhausted, r.mean_sim_time_s_completed ? Math.round(r.mean_sim_time_s_completed) + " s" : "–", r.recoveries]);
+  });
+  el("line", { x1: L, x2: L, y1: top, y2: plotB, class: "base" }, s);
+  el("line", { x1: sx(70), x2: sx(70), y1: top - 4, y2: plotB + 4, class: "thresh" }, s);
+  el("text", { x: sx(70), y: top - 0, dx: 6, dy: -2, class: "thresh-label" }, s, "");
+  el("text", { x: (L + W - R) / 2, y: plotB + 34, "text-anchor": "middle", class: "tick" }, s, "hands completed of 100 (dashed line: 70 required)");
+  table("g3-table", ["Mode", "Completed", "Robot won", "Other won", "Exhausted", "Sim time / hand", "Recoveries"], rows);
+})();
+
+/* ---------- Gate 3: paired outcome bar ---------- */
+(function () {
+  const P = D.paired;
+  const seg = [["Both completed", P.both, "var(--neutral-fill)"], ["Classical only", P.cls_only, S1], ["Hybrid only", P.hyb_only, S2], ["Neither completed", P.neither, "none"]];
+  legend("pair-legend", seg.map(x => [`${x[0]} (${x[1]})`, x[2] === "none" ? "transparent;box-shadow:inset 0 0 0 1.5px var(--muted)" : x[2]]));
+  const W = 520, H = 96, L = 0, R = 0;
+  const s = svg("pair-chart", W, H);
+  let x = L; const total = seg.reduce((a, b) => a + b[1], 0), sc = (W - L - R) / total;
+  seg.forEach(([name, v, col], i) => {
+    const w = v * sc;
+    el("rect", { x: x + (i ? 1 : 0) + (col === "none" ? 0.75 : 0), y: col === "none" ? 20.75 : 20, width: Math.max(0, w - (i ? 2 : 0) - (col === "none" ? 1.5 : 0)), height: col === "none" ? 32.5 : 34, fill: col === "none" ? "var(--surface)" : col, stroke: col === "none" ? "var(--muted)" : "none", "stroke-dasharray": "3 3", "stroke-width": 1.5, rx: i === 0 || i === seg.length - 1 ? 4 : 0, "data-tip": `${name}: ${v} of 100 hands` }, s);
+    if (w > 26) el("text", { x: x + w / 2, y: 42, "text-anchor": "middle", class: "val" }, s, v);
+    x += w;
+  });
+  el("text", { x: 0, y: 12, class: "tick" }, s, "0");
+  el("text", { x: W, y: 12, "text-anchor": "end", class: "tick" }, s, "100 hands");
+  el("text", { x: (P.both + P.cls_only / 2) * sc, y: 74, "text-anchor": "middle", class: "tick" }, s, "classical only: 7");
+  el("text", { x: (P.both + P.cls_only + P.hyb_only / 2) * sc + 34, y: 90, "text-anchor": "middle", class: "tick" }, s, "hybrid only: 1");
+})();
+
+/* ---------- Gate 3: failure causes ---------- */
+(function () {
+  const C = D.g3causes;
+  const cats = Array.from(new Set([...Object.keys(C.classical), ...Object.keys(C.hybrid)]))
+    .sort((a, b) => ((C.classical[b] || 0) + (C.hybrid[b] || 0)) - ((C.classical[a] || 0) + (C.hybrid[a] || 0)));
+  const modes = [["classical", "Classical-only", S1], ["hybrid", "Hybrid", S2]];
+  legend("fc-legend", modes.map(m => [m[1], m[2]]));
+  const W = 520, L = 12, R = 34, top = 8, bh = 11, gi = 2, lab = 21, gg = 12;
+  const gh = lab + modes.length * (bh + gi);
+  const H = top + cats.length * gh + (cats.length - 1) * gg + 26;
+  const s = svg("fc-chart", W, H);
+  const max = 20, sx = v => L + v / max * (W - L - R);
+  [0, 5, 10, 15, 20].forEach(t => {
+    el("line", { x1: sx(t), x2: sx(t), y1: top, y2: H - 22, class: "grid" }, s);
+    el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "tick" }, s, t);
+  });
+  let y = top; const rows = [];
+  cats.forEach(c => {
+    el("text", { x: L, y: y + 12, style: "font-weight:600;fill:var(--ink)" }, s, c);
+    y += lab;
+    modes.forEach(([m, mn, col]) => {
+      const v = C[m][c] || 0;
+      if (v) roundedBarH(s, L, y, sx(v) - L, bh, col, `${mn}: ${v} hands failed on "${c}"`);
+      el("text", { x: sx(v) + 5, y: y + bh - 1.5, class: "val" }, s, v);
+      y += bh + gi;
+    });
+    rows.push([c, C.classical[c] || 0, C.hybrid[c] || 0]);
+    y += gg - gi;
+  });
+  el("line", { x1: L, x2: L, y1: top, y2: H - 22, class: "base" }, s);
+  table("fc-table", ["Cause", "Classical-only", "Hybrid"], rows);
+})();
+
+/* ---------- Contact policy residuals ---------- */
+(function () {
+  const P = D.contact_p90;
+  const order = [["pick_flat", "Flat pick", "used by hybrid"], ["extract", "Close-packed extraction", "lost in dev trials"], ["insert_right", "Insert at right end", "lost in dev trials"], ["regrasp", "Side regrasp", "above 3 mm"], ["insert_left", "Insert at left end", "above 3 mm"]];
+  const W = 520, L = 12, R = 170, top = 8, bh = 14, lab = 19, gg = 12;
+  const H = top + order.length * (lab + bh) + (order.length - 1) * gg + 26;
+  const s = svg("cp-chart", W, H);
+  const max = 6, sx = v => L + v / max * (W - L - R);
+  [0, 1, 2, 3, 4, 5, 6].forEach(t => {
+    el("line", { x1: sx(t), x2: sx(t), y1: top, y2: H - 22, class: "grid" }, s);
+    el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "tick" }, s, t + (t === 6 ? " mm" : ""));
+  });
+  let y = top;
+  order.forEach(([k, name, note]) => {
+    el("text", { x: L, y: y + 11, style: "font-weight:600;fill:var(--ink)" }, s, name);
+    y += lab;
+    const v = P[k];
+    roundedBarH(s, L, y, sx(v) - L, bh, S1, `${name}: 90% of held-out residuals below ${v.toFixed(2)} mm<br>${note}`);
+    el("text", { x: sx(v) + 5, y: y + bh - 2.5, class: "val" }, s, v.toFixed(1) + " mm");
+    const used = k === "pick_flat";
+    el("text", { x: W - R + 58, y: y + bh - 2.5, style: `font-size:11.5px;fill:${used ? "var(--good-text)" : "var(--ink-2)"};font-weight:${used ? 600 : 400}` }, s, (used ? "✓ " : "") + note);
+    y += bh + gg;
+  });
+  el("line", { x1: L, x2: L, y1: top, y2: H - 22, class: "base" }, s);
+  el("line", { x1: sx(3), x2: sx(3), y1: top, y2: H - 22, class: "thresh" }, s);
+})();
+
+/* ---------- timeline ---------- */
+(function () {
+  const steps = [
+    ["dev · 2 hands", "<b>First physical hands.</b> Wrist scan put the fingertips into the table; end tiles too oblique to read.", 0, 2],
+    ["dev · 20 hands", "<b>Row split by rim lines</b> instead of dividing its length; hand region widened.", 1, 20],
+    ["dev · 20 hands", "<b>Shared zone refilled after calls</b>, pond kept inside the image, compaction pushes overshoot 2.5 mm.", 14, 20],
+    ["held-out block 0", "<b>Preliminary run</b> before the last changes; kept separate from the final comparison.", 75, 100],
+    ["held-out block 1", "<b>Final classical-only run</b>, same seeds as hybrid and learned-only.", 72, 100],
+  ];
+  document.getElementById("timeline").innerHTML = steps.map(([w, t, k, n]) => `<div class="step"><div class="when">${w}</div><div class="what">${t}<div class="meter" aria-hidden="true"><i style="width:${k / n * 100}%"></i></div></div><div class="score">${k}/${n}</div></div>`).join("");
+})();
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById("tip");
+function showTip(ev, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > window.innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.hidden = true; }
+document.addEventListener("mousemove", ev => {
+  const t = ev.target.closest && ev.target.closest("[data-tip]");
+  if (t) showTip(ev, t.getAttribute("data-tip"));
+  else if (!ev.target.closest || !ev.target.closest("#tr-chart")) hideTip();
+});
+</script>

@@ -1,0 +1,4 @@
+/home/zilin12/Desktop/comma/MDP_Mahjong/src/mahjong_robot/vision/classifier.py:92: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  hist.append({"epoch": ep, "loss": float(loss), "val_acc": acc})
+best 0.9792782664299011

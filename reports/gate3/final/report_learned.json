@@ -1,0 +1,27 @@
+{
+  "gate": "gate3_physics_integration",
+  "mode": "learned",
+  "policy": "runs/gate1/checkpoints/best.pt",
+  "seeds": [
+    3000000100,
+    3000000199
+  ],
+  "summary": {
+    "hands": 100,
+    "completed": 0,
+    "completion_rate": 0.0,
+    "faults": {
+      "collision": 100
+    },
+    "outcomes": {
+      "robot_win": 0,
+      "other_win": 0,
+      "exhausted": 0
+    },
+    "mean_sim_time_s_completed": null,
+    "mean_operations": 0.0,
+    "recoveries": 0,
+    "hands_with_recovery_completed": 0
+  },
+  "passed": false
+}

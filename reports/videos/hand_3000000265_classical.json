@@ -1,0 +1,401 @@
+{
+ "result": {
+  "seed": 3000000265,
+  "mode": "classical",
+  "seat": 1,
+  "completed": true,
+  "fault": null,
+  "detail": "",
+  "robot_actions": [
+   "discard 1C",
+   "pung",
+   "discard 9D",
+   "discard 4B",
+   "chow (discard low)",
+   "discard 9B",
+   "discard 9B",
+   "pass",
+   "discard WD",
+   "discard 1C",
+   "pass",
+   "self-draw win"
+  ],
+  "outcome": "robot_win",
+  "win_type": "self_draw",
+  "sim_time_s": 517.3,
+  "wall_time_s": 134.2,
+  "recoveries": 0,
+  "observations": 50,
+  "operations": 36
+ },
+ "robot_decisions": [
+  {
+   "sim_time_s": 16.5,
+   "phase": "turn",
+   "action": "discard 1C"
+  },
+  {
+   "sim_time_s": 75.6,
+   "phase": "claim",
+   "action": "pung"
+  },
+  {
+   "sim_time_s": 164.1,
+   "phase": "after_call",
+   "action": "discard 9D"
+  },
+  {
+   "sim_time_s": 212.2,
+   "phase": "turn",
+   "action": "discard 4B"
+  },
+  {
+   "sim_time_s": 271.1,
+   "phase": "claim",
+   "action": "chow (discard low)"
+  },
+  {
+   "sim_time_s": 369.3,
+   "phase": "after_call",
+   "action": "discard 9B"
+  },
+  {
+   "sim_time_s": 408.8,
+   "phase": "turn",
+   "action": "discard 9B"
+  },
+  {
+   "sim_time_s": 441.8,
+   "phase": "claim",
+   "action": "pass"
+  },
+  {
+   "sim_time_s": 444.4,
+   "phase": "turn",
+   "action": "discard WD"
+  },
+  {
+   "sim_time_s": 480.3,
+   "phase": "turn",
+   "action": "discard 1C"
+  },
+  {
+   "sim_time_s": 513.9,
+   "phase": "claim",
+   "action": "pass"
+  },
+  {
+   "sim_time_s": 517.1,
+   "phase": "turn",
+   "action": "self-draw win"
+  }
+ ],
+ "events": [
+  [
+   "deal"
+  ],
+  [
+   "deal_draw",
+   "0",
+   "62"
+  ],
+  [
+   "discard",
+   "0",
+   "129"
+  ],
+  [
+   "draw",
+   "1",
+   "33"
+  ],
+  [
+   "discard",
+   "1",
+   "0"
+  ],
+  [
+   "draw",
+   "2",
+   "41"
+  ],
+  [
+   "discard",
+   "2",
+   "131"
+  ],
+  [
+   "draw",
+   "3",
+   "56"
+  ],
+  [
+   "discard",
+   "3",
+   "120"
+  ],
+  [
+   "draw",
+   "0",
+   "127"
+  ],
+  [
+   "discard",
+   "0",
+   "110"
+  ],
+  [
+   "pung",
+   "1",
+   "110",
+   "0",
+   "(111, 108)"
+  ],
+  [
+   "discard",
+   "1",
+   "107"
+  ],
+  [
+   "draw",
+   "2",
+   "115"
+  ],
+  [
+   "discard",
+   "2",
+   "126"
+  ],
+  [
+   "pung",
+   "0",
+   "126",
+   "2",
+   "(127, 124)"
+  ],
+  [
+   "discard",
+   "0",
+   "43"
+  ],
+  [
+   "draw",
+   "1",
+   "69"
+  ],
+  [
+   "discard",
+   "1",
+   "51"
+  ],
+  [
+   "chow",
+   "2",
+   "51",
+   "1",
+   "(41, 45)"
+  ],
+  [
+   "discard",
+   "2",
+   "135"
+  ],
+  [
+   "draw",
+   "3",
+   "104"
+  ],
+  [
+   "discard",
+   "3",
+   "35"
+  ],
+  [
+   "draw",
+   "0",
+   "79"
+  ],
+  [
+   "discard",
+   "0",
+   "79"
+  ],
+  [
+   "chow",
+   "1",
+   "79",
+   "0",
+   "(82, 87)"
+  ],
+  [
+   "discard",
+   "1",
+   "69"
+  ],
+  [
+   "draw",
+   "2",
+   "37"
+  ],
+  [
+   "discard",
+   "2",
+   "37"
+  ],
+  [
+   "draw",
+   "3",
+   "12"
+  ],
+  [
+   "discard",
+   "3",
+   "117"
+  ],
+  [
+   "draw",
+   "0",
+   "44"
+  ],
+  [
+   "discard",
+   "0",
+   "44"
+  ],
+  [
+   "draw",
+   "1",
+   "71"
+  ],
+  [
+   "discard",
+   "1",
+   "71"
+  ],
+  [
+   "draw",
+   "2",
+   "134"
+  ],
+  [
+   "discard",
+   "2",
+   "134"
+  ],
+  [
+   "draw",
+   "3",
+   "94"
+  ],
+  [
+   "discard",
+   "3",
+   "128"
+  ],
+  [
+   "draw",
+   "0",
+   "83"
+  ],
+  [
+   "discard",
+   "0",
+   "83"
+  ],
+  [
+   "draw",
+   "1",
+   "133"
+  ],
+  [
+   "discard",
+   "1",
+   "133"
+  ],
+  [
+   "draw",
+   "2",
+   "34"
+  ],
+  [
+   "discard",
+   "2",
+   "34"
+  ],
+  [
+   "draw",
+   "3",
+   "53"
+  ],
+  [
+   "discard",
+   "3",
+   "114"
+  ],
+  [
+   "draw",
+   "0",
+   "59"
+  ],
+  [
+   "discard",
+   "0",
+   "18"
+  ],
+  [
+   "draw",
+   "1",
+   "3"
+  ],
+  [
+   "discard",
+   "1",
+   "3"
+  ],
+  [
+   "draw",
+   "2",
+   "112"
+  ],
+  [
+   "discard",
+   "2",
+   "63"
+  ],
+  [
+   "chow",
+   "3",
+   "63",
+   "2",
+   "(53, 56)"
+  ],
+  [
+   "discard",
+   "3",
+   "104"
+  ],
+  [
+   "chow",
+   "0",
+   "104",
+   "3",
+   "(99, 103)"
+  ],
+  [
+   "discard",
+   "0",
+   "68"
+  ],
+  [
+   "draw",
+   "1",
+   "26"
+  ],
+  [
+   "win",
+   "1",
+   "self_draw",
+   "26"
+  ]
+ ]
+}

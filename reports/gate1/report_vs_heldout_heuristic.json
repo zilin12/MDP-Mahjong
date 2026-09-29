@@ -1,0 +1,107 @@
+{
+  "gate": "gate1_playing_agent",
+  "policy": "runs/gate1/checkpoints/best.pt",
+  "opponents": "heldout_heuristic",
+  "test_seed_range": [
+    2000000000,
+    2000009999
+  ],
+  "seat_counts": [
+    2500,
+    2500,
+    2500,
+    2500
+  ],
+  "conditions": {
+    "policy": {
+      "hands": 10000,
+      "wins": 1343,
+      "win_rate": 0.1343,
+      "win_rate_ci95": [
+        0.12775726135267618,
+        0.14112359506006572
+      ],
+      "dealin_rate": 0.2222,
+      "exhausted_rate": 0.0027,
+      "illegal_actions": 0,
+      "win_rate_by_seat": [
+        0.1388,
+        0.136,
+        0.1348,
+        0.1276
+      ],
+      "structures": {
+        "standard": 1341,
+        "seven_pairs": 2,
+        "thirteen_orphans": 0
+      }
+    },
+    "random": {
+      "hands": 10000,
+      "wins": 11,
+      "win_rate": 0.0011,
+      "win_rate_ci95": [
+        0.000614350651484294,
+        0.0019688029288190256
+      ],
+      "dealin_rate": 0.2701,
+      "exhausted_rate": 0.0075,
+      "illegal_actions": 0,
+      "win_rate_by_seat": [
+        0.0012,
+        0.0,
+        0.002,
+        0.0012
+      ],
+      "structures": {
+        "standard": 11,
+        "seven_pairs": 0,
+        "thirteen_orphans": 0
+      }
+    },
+    "heuristic": {
+      "hands": 10000,
+      "wins": 3033,
+      "win_rate": 0.3033,
+      "win_rate_ci95": [
+        0.2943673106592586,
+        0.31238375430214793
+      ],
+      "dealin_rate": 0.1808,
+      "exhausted_rate": 0.0019,
+      "illegal_actions": 0,
+      "win_rate_by_seat": [
+        0.318,
+        0.3008,
+        0.3124,
+        0.282
+      ],
+      "structures": {
+        "standard": 2988,
+        "seven_pairs": 45,
+        "thirteen_orphans": 0
+      }
+    }
+  },
+  "policy_minus_random": {
+    "mean": 0.1332,
+    "ci95": [
+      0.1264939017041877,
+      0.13990609829581233
+    ],
+    "n": 10000
+  },
+  "policy_minus_heuristic": {
+    "mean": -0.169,
+    "ci95": [
+      -0.17947925846626933,
+      -0.1585207415337307
+    ],
+    "n": 10000
+  },
+  "criteria": {
+    "no_illegal_actions": true,
+    "advantage_over_random_ci_above_zero": true
+  },
+  "passed": true
+}

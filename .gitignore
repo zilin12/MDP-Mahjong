@@ -1,0 +1,20 @@
+# Environment and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+MUJOCO_LOG.TXT
+.preview/
+.audit/
+
+# Regenerable datasets (scripts/build_tile_dataset.py, scripts/generate_*_data.py): ~3.7 GB
+data/
+
+# Per-hand failure dumps (overhead images + ground-truth state), regenerable with record_dir
+reports/gate3/**/faults/
+
+# Training runs: keep configs, logs, selection records and the selected policies only
+runs/**/league/
+runs/**/checkpoints/*
+!runs/**/checkpoints/best.pt

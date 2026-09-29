@@ -1,0 +1,29 @@
+{
+  "gate": "gate3_physics_integration",
+  "mode": "hybrid",
+  "policy": "models/playing_policy.pt",
+  "seeds": [
+    3000000200,
+    3000000299
+  ],
+  "summary": {
+    "hands": 100,
+    "completed": 71,
+    "completion_rate": 0.71,
+    "faults": {
+      "verification": 13,
+      "identity": 15,
+      "silent_identity": 1
+    },
+    "outcomes": {
+      "robot_win": 15,
+      "other_win": 56,
+      "exhausted": 0
+    },
+    "mean_sim_time_s_completed": 541.3577464788733,
+    "mean_operations": 33.51,
+    "recoveries": 41,
+    "hands_with_recovery_completed": 8
+  },
+  "passed": true
+}

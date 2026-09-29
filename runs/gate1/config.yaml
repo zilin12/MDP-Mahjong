@@ -1,0 +1,47 @@
+run_dir: runs/gate1
+seed: 0
+workers: 20
+hands_per_iter: 4096
+iterations: 300
+lr: 0.0003
+epochs: 4
+minibatch_episodes: 256
+clip: 0.2
+vf_coef: 0.5
+ent_coef: 0.01
+ent_coef_final: 0.002
+max_grad_norm: 0.5
+gamma: 1.0
+lam: 0.95
+shaping: 0.5
+dealin_penalty: 0.0
+hidden: 256
+val_every: 5
+val_hands: 2000
+val_opponents:
+- heuristic
+snapshot_every: 10
+league_size: 8
+torch_threads: 16
+stages:
+- name: random_opponents
+  opponents:
+  - random
+  league_prob: 0.0
+  promote_winrate: 0.6
+  min_iters: 5
+  max_iters: 40
+- name: heuristic_opponents
+  opponents:
+  - heuristic
+  league_prob: 0.0
+  promote_winrate: 0.25
+  min_iters: 30
+  max_iters: 120
+- name: league
+  opponents:
+  - heuristic
+  league_prob: 0.5
+  promote_winrate: null
+  min_iters: 0
+  max_iters: null
